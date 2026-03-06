@@ -25,4 +25,4 @@ echo "Starting LLM gateway on 8005..."
 python -m uvicorn Api_LLM:app --host 0.0.0.0 --port 8005 &
 
 echo "Starting Streamlit on ${PORT}..."
-exec streamlit run app.py --server.port ${PORT} --server.address 0.0.0.0
+exec streamlit run streamlit_app.py --server.port ${PORT}
