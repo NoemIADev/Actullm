@@ -1,8 +1,31 @@
-FROM python:3.11
+FROM python:3.12-slim
+
 WORKDIR /app
+
+# Variables utiles
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Dépendances système minimales
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copier les dépendances d'abord pour profiter du cache Docker
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copier tout le projet
 COPY . .
-RUN pip install fastapi uvicorn pydantic requests feedparser langchain-community langchain-text-splitters faiss-cpu sentence-transformers
 
-CMD ["sh", "-c", "uvicorn Api_add_articles:app --host 0.0.0.0 --port 8001 & sleep 5 && python api_c1.py && sleep 15 && python c2.py"]
+# Rendre le script de démarrage exécutable
+RUN chmod +x startup.sh
 
-RUN python rss_file.py
+# Port exposé par Streamlit côté Azure
+EXPOSE 8000
+
+CMD ["./startup.sh"]
